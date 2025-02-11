@@ -1,6 +1,6 @@
 ## What is MCP?
 
-The Model Context Protocol (MCP) is a specialized framework designed to streamline the process of enabling AI agents to interact with a wide array of tools. This starter template helps you quickly build a Model Context Protocol (MCP) server using TypeScript. It provides a robust foundation that you can easily extend to create advanced MCP tools and seamlessly integrate them with AI assistants like Claude or other MCP-supported platforms. By following this guide, you can effectively design, build, and manage custom functionalities without the overhead of writing specialized integration code.
+The Model Context Protocol (MCP) is a specialized framework designed to streamline the process of enabling AI agents to interact with a wide array of tools. This starter template helps you quickly build a Model Context Protocol (MCP) server using TypeScript. It provides a robust foundation that you can easily extend to create advanced MCP tools and seamlessly integrate them with AI assistants like Claude or other MCP-supported platforms.
 
 - **MCP Servers**: These servers act as bridges, exposing APIs, databases, and code libraries to external AI hosts. By implementing an MCP server in Python or TypeScript, developers can share data sources or computational logic in a standardized way.
 - **MCP Clients**: These are the consumer-facing side of MCP, communicating with servers to query data or perform actions. MCP clients also use Python or TypeScript SDKs, ensuring a uniform approach to tool usage.
@@ -68,285 +68,290 @@ The `.devcontainer` directory streamlines container-based development, while the
   ```
   Launches the server alongside a debugging tool, enabling you to trace issues, set breakpoints, and inspect variables in real time.
 
-## Setting Up Your MCP Server
+## Tool Response Format
 
-### Step 1: Install Dependencies
-
-Create a new project directory and initialize an npm package. Include dependencies for both MCP functionality and TypeScript to ensure robust type-checking and maintainability.
-
-Below is a sample `package.json` demonstrating a possible configuration for your server:
-
-```json
-{
-  "name": "mcp-server",
-  "version": "0.1.0",
-  "description": "A Model Context Protocol server example",
-  "private": true,
-  "type": "module",
-  "bin": {
-    "mcp-server": "./build/index.js"
-  },
-  "files": [
-    "build"
-  ],
-  "scripts": {
-    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
-    "prepare": "npm run build",
-    "watch": "tsc --watch",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.3"
-  },
-  "devDependencies": {
-    "@types/node": "^20.11.24",
-    "typescript": "^5.3.3"
-  }
-}
-```
-
-Next, configure TypeScript in `tsconfig.json` to dictate how the compiler processes your code:
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "Node16",
-    "moduleResolution": "Node16",
-    "outDir": "./build",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
-}
-```
-
-This setup ensures you have access to modern JavaScript features and helps catch potential type issues early. The `"strict": true` option enforces stricter checks, reducing runtime bugs.
-
-### Step 2: Example Tools
-
-First, set up your main server entry point (`src/index.ts`):
+MCP tools must return responses in a specific format to ensure proper communication with AI hosts. Here's the structure:
 
 ```typescript
-/**
- * Main entry point for the MCP server.
- * This file sets up the server instance, registers tools, and handles MCP protocol requests.
- */
+interface ToolResponse {
+  content: ContentItem[];
+  isError?: boolean;
+  metadata?: Record<string, unknown>;
+}
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { registerCalculatorTool } from "./examples/calculator.js";
-import { registerRestApiTool } from "./examples/rest-api.js";
+interface ContentItem {
+  type: string;
+  text?: string;
+  mimeType?: string;
+  data?: unknown;
+}
+```
 
-/**
- * Create a new MCP server instance.
- * The server is configured with basic metadata and capabilities.
- */
-const server = new McpServer({
-  name: "mcp-server-starter",
-  version: "0.1.0"
+Supported content types include:
+- `text`: Plain text content
+- `code`: Code snippets with optional language specification
+- `image`: Base64-encoded images with MIME type
+- `file`: File content with MIME type
+- `error`: Error messages (when `isError` is true)
+
+Example response:
+```typescript
+return {
+  content: [
+    {
+      type: "text",
+      text: "Operation completed successfully"
+    },
+    {
+      type: "code",
+      text: "console.log('Hello, World!')",
+      mimeType: "application/javascript"
+    }
+  ]
+};
+```
+
+## Security Best Practices
+
+When developing MCP tools, follow these security guidelines:
+
+1. **Input Validation**:
+   - Always validate input parameters using Zod schemas
+   - Implement strict type checking
+   - Sanitize user inputs before processing
+   - Use the `strict()` option in schemas to prevent extra properties
+
+2. **Error Handling**:
+   - Never expose internal error details to clients
+   - Implement proper error boundaries
+   - Log errors securely
+   - Return user-friendly error messages
+
+3. **Resource Management**:
+   - Implement proper cleanup procedures
+   - Handle process termination signals
+   - Close connections and free resources
+   - Implement timeouts for long-running operations
+
+4. **API Security**:
+   - Use secure transport protocols
+   - Implement rate limiting
+   - Store sensitive data securely
+   - Use environment variables for configuration
+
+Example secure tool implementation:
+```typescript
+const SecureSchema = z.object({
+  input: z.string()
+    .min(1)
+    .max(1000)
+    .transform(str => str.trim())
+    .pipe(z.string().regex(/^[a-zA-Z0-9\s]+$/))
 });
 
-// Register the example tools provided with the starter pack
-registerCalculatorTool(server);
-registerRestApiTool(server);
+server.tool(
+  "secure_tool",
+  SecureSchema.shape,
+  async (params) => {
+    try {
+      // Implement rate limiting
+      await rateLimiter.checkLimit();
 
-// Set up communication with the MCP host using stdio transport
+      // Process validated input
+      const result = await processSecurely(params.input);
+
+      return {
+        content: [{
+          type: "text",
+          text: result
+        }]
+      };
+    } catch (error) {
+      // Log error internally
+      logger.error(error);
+
+      // Return safe error message
+      return {
+        content: [{
+          type: "text",
+          text: "An error occurred processing your request"
+        }],
+        isError: true
+      };
+    }
+  }
+);
+```
+
+## Advanced Features
+
+### Streaming Responses
+
+MCP supports streaming responses for long-running operations:
+
+```typescript
+server.tool(
+  "stream_data",
+  StreamSchema.shape,
+  async function* (params) {
+    for (const chunk of dataStream) {
+      yield {
+        content: [{
+          type: "text",
+          text: chunk
+        }]
+      };
+    }
+  }
+);
+```
+
+### Custom Content Types
+
+You can define custom content types for specialized data:
+
+```typescript
+interface CustomContent extends ContentItem {
+  type: "custom";
+  data: {
+    format: string;
+    value: unknown;
+  };
+}
+```
+
+### Async Tool Execution
+
+Implement proper async handling:
+
+```typescript
+server.tool(
+  "async_operation",
+  AsyncSchema.shape,
+  async (params) => {
+    const operation = await startAsyncOperation();
+
+    while (!operation.isComplete()) {
+      await operation.wait();
+    }
+
+    return {
+      content: [{
+        type: "text",
+        text: await operation.getResult()
+      }]
+    };
+  }
+);
+```
+
+## Testing & Debugging
+
+### Unit Testing
+
+Use Jest for testing your tools:
+
+```typescript
+describe('Calculator Tool', () => {
+  let server: McpServer;
+
+  beforeEach(() => {
+    server = new McpServer({
+      name: "test-server",
+      version: "1.0.0"
+    });
+    registerCalculatorTool(server);
+  });
+
+  test('adds numbers correctly', async () => {
+    const result = await server.executeTool('calculate', {
+      a: 5,
+      b: 3,
+      operation: 'add'
+    });
+
+    expect(result.content[0].text).toBe('8');
+  });
+});
+```
+
+### Debugging Tools
+
+1. **MCP Inspector**:
+   ```bash
+   npm run inspector
+   ```
+   Provides real-time inspection of:
+   - Tool registration
+   - Request/response flow
+   - Error handling
+   - Performance metrics
+
+2. **Logging**:
+   ```typescript
+   function logMessage(level: 'info' | 'warn' | 'error', message: string) {
+     console.error(`[${level.toUpperCase()}] ${message}`);
+   }
+   ```
+
+3. **Error Tracking**:
+   ```typescript
+   process.on('uncaughtException', (error: Error) => {
+     logMessage('error', `Uncaught error: ${error.message}`);
+     // Implement error reporting
+   });
+   ```
+
+## Transport Configuration
+
+MCP supports multiple transport protocols:
+
+### stdio Transport
+
+```typescript
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+
 const transport = new StdioServerTransport();
 await server.connect(transport);
 ```
 
-Then, create your tool implementations. Each tool should be in its own file under the `src/examples/` directory:
-
-#### Calculator Tool Example
-
-Below is a simple arithmetic tool that adds two numbers:
+### WebSocket Transport
 
 ```typescript
-/**
- * Calculator Tool Example
- *
- * This module demonstrates how to implement a basic MCP tool that performs arithmetic
- * operations. It highlights:
- * - Tool registration
- * - Input schema definition using Zod
- * - Parameter validation
- * - Error handling
- */
+import { WebSocketServerTransport } from "@modelcontextprotocol/sdk/server/websocket.js";
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-
-/**
- * Schema for the calculator tool parameters.
- * Descriptions clarify the purpose of each parameter for AI agents.
- */
-const CalculatorSchema = z.object({
-  a: z.number().describe("First number to add"),
-  b: z.number().describe("Second number to add")
+const transport = new WebSocketServerTransport({
+  port: 3000
 });
+await server.connect(transport);
+```
 
-/**
- * Registers the calculator tool with the MCP server.
- * By defining the schema and providing a callback function, you ensure the server knows how
- * to parse the input, execute the calculation, and format the response.
- *
- * @param server - The MCP server instance to register the tool with.
- */
-export function registerCalculatorTool(server: McpServer) {
-  server.tool(
-    "calculate_sum",
-    CalculatorSchema.shape,
-    async (params) => ({
-      content: [{
-        type: "text",
-        text: String(params.a + params.b)
-      }]
-    })
-  );
+### Custom Transport
+
+```typescript
+import { Transport } from "@modelcontextprotocol/sdk/server/transport.js";
+
+class CustomTransport implements Transport {
+  // Implement transport methods
 }
 ```
 
-Thanks to the schema, the tool automatically validates that both `a` and `b` are numbers.
+## Server Capabilities
 
-#### REST API Tool Example
-
-For a more advanced scenario, here is a tool that fetches data from an external API and transforms it into an MCP-compatible result:
+Configure server capabilities:
 
 ```typescript
-/**
- * REST API Tool Example
- *
- * This module demonstrates how to implement an MCP tool that interacts with external APIs.
- * It showcases:
- * - Making HTTP requests
- * - Handling API responses
- * - Proper error handling for network requests
- * - Converting external API data into MCP tool results
- */
-
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-
-/**
- * Schema for the user data returned by JSONPlaceholder API.
- * This helps ensure the structure of the response is correct.
- */
-const UserDataSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  username: z.string(),
-  email: z.string(),
-  address: z.object({
-    street: z.string(),
-    suite: z.string(),
-    city: z.string(),
-    zipcode: z.string()
-  }),
-  phone: z.string(),
-  website: z.string(),
-  company: z.object({
-    name: z.string(),
-    catchPhrase: z.string(),
-    bs: z.string()
-  })
+const server = new McpServer({
+  name: "mcp-server",
+  version: "1.0.0",
+  capabilities: {
+    tools: {}, // Enable tools capability
+    streaming: true, // Enable streaming support
+    customContent: ["myFormat"], // Define custom content types
+    metadata: true // Enable metadata support
+  }
 });
-
-/**
- * Schema for the fetch user tool parameters.
- * This ensures a valid user ID is provided.
- */
-const FetchUserSchema = z.object({
-  userId: z.number().positive().describe("ID of the user to fetch")
-});
-
-/**
- * Registers the REST API tool with the MCP server.
- *
- * This demonstrates how you can connect external data sources to the MCP ecosystem by
- * validating inputs, sending a request, and returning the response.
- *
- * @param server - The MCP server instance to register the tool with.
- */
-export function registerRestApiTool(server: McpServer) {
-  server.tool(
-    "fetch_user",
-    FetchUserSchema.shape,
-    async (params) => {
-      try {
-        // Make the HTTP request
-        const response = await fetch(
-          `https://jsonplaceholder.typicode.com/users/${params.userId}`
-        );
-
-        if (!response.ok) {
-          // Handle HTTP errors gracefully
-          if (response.status === 404) {
-            return {
-              content: [{
-                type: "text",
-                text: `User with ID ${params.userId} not found`
-              }],
-              isError: true
-            };
-          }
-          return {
-            content: [{
-              type: "text",
-              text: `API request failed with status ${response.status}`
-            }],
-            isError: true
-          };
-        }
-
-        // Parse and validate the API response
-        const rawData = await response.json();
-        const userData = UserDataSchema.parse(rawData);
-
-        // Return the validated data as formatted text
-        return {
-          content: [{
-            type: "text",
-            text: JSON.stringify(userData, null, 2)
-          }]
-        };
-      } catch (error) {
-        // Handle unexpected or Zod validation errors
-        if (error instanceof z.ZodError) {
-          return {
-            content: [{
-              type: "text",
-              text: `Invalid API response format: ${error.message}`
-            }],
-            isError: true
-          };
-        } else if (error instanceof Error) {
-          return {
-            content: [{
-              type: "text",
-              text: `Failed to fetch user data: ${error.message}`
-            }],
-            isError: true
-          };
-        }
-        return {
-          content: [{
-            type: "text",
-            text: "An unknown error occurred"
-          }],
-          isError: true
-        };
-      }
-    }
-  );
-}
 ```
-
-When integrated with an AI environment, you can invoke this tool by requesting something like `fetch_user` with `userId=3`, receiving validated user data or a clear error message.
 
 ## Integration with MCP Hosts
 
@@ -472,6 +477,8 @@ For further information on the MCP ecosystem, refer to:
 
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io): Detailed coverage of MCP architecture, design principles, and more advanced usage examples.
 - [Smithery - MCP Server Registry](https://smithery.ai/docs): Guidelines for publishing your tools to Smithery and best practices for their registry.
+- [MCP TypeScript SDK Documentation](https://modelcontextprotocol.io/typescript): Comprehensive documentation of the TypeScript SDK.
+- [MCP Security Guidelines](https://modelcontextprotocol.io/security): Detailed security best practices and recommendations.
 
 ## Conclusion
 
