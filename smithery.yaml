@@ -3,11 +3,43 @@
 startCommand:
   type: stdio
   configSchema:
-    # JSON Schema defining the configuration options for the MCP.
     type: object
+    title: "MCP Server Configuration"
+    description: "Configuration options for the MCP server"
+    properties:
+      calculator:
+        type: object
+        title: "Calculator Tool"
+        description: "Configuration for the calculator tool"
+        properties:
+          enabled:
+            type: boolean
+            default: true
+            description: "Enable/disable the calculator tool"
+      restApi:
+        type: object
+        title: "REST API Tool"
+        description: "Configuration for the REST API tool"
+        properties:
+          enabled:
+            type: boolean
+            default: true
+            description: "Enable/disable the REST API tool"
+          maxRetries:
+            type: integer
+            default: 3
+            minimum: 1
+            maximum: 5
+            description: "Maximum number of retries for API calls"
     required: []
-    properties: {}
-  commandFunction:
-    # A function that produces the CLI command to start the MCP on stdio.
-    |-
-    (config) => ({ command: 'node', args: ['build/index.js'] })
+  commandFunction: |-
+    (config) => ({
+      command: 'node',
+      args: ['build/index.js'],
+      env: {
+        NODE_ENV: 'production',
+        CALCULATOR_ENABLED: config.calculator?.enabled?.toString() || 'true',
+        REST_API_ENABLED: config.restApi?.enabled?.toString() || 'true',
+        REST_API_MAX_RETRIES: config.restApi?.maxRetries?.toString() || '3'
+      }
+    })
