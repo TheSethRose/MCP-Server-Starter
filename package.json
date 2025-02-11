@@ -22,7 +22,11 @@
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "watch": "tsc --watch",
     "inspector": "npx @modelcontextprotocol/inspector build/index.js",
-    "dev": "concurrently \"npm run watch\" \"npm run inspector\""
+    "dev": "concurrently \"npm run watch\" \"npm run inspector\"",
+    "debug": "node --inspect build/index.js",
+    "debug:watch": "concurrently \"npm run watch\" \"npm run debug\"",
+    "logs": "tail -n 20 -F ~/Library/Logs/Claude/mcp*.log",
+    "clean": "rm -rf build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.3"
