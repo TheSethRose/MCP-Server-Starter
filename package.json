@@ -1,0 +1,37 @@
+{
+  "name": "mcp-server-starter",
+  "version": "0.1.0",
+  "description": "A Model Context Protocol server starter template",
+  "author": {
+    "name": "Seth Rose",
+    "url": "https://www.sethrose.dev",
+    "social": {
+      "twitter": "https://x.com/TheSethRose",
+      "bluesky": "https://bsky.app/profile/sethrose.dev"
+    }
+  },
+  "private": true,
+  "type": "module",
+  "bin": {
+    "mcp-server": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "dev": "concurrently \"npm run watch\" \"npm run inspector\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "concurrently": "^8.2.2",
+    "prettier": "^3.4.2",
+    "typescript": "^5.3.3"
+  }
+}
