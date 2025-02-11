@@ -4,9 +4,35 @@
 
 The Model Context Protocol (MCP) is a specialized framework designed to streamline the process of enabling AI agents to interact with a wide array of tools. This starter template helps you quickly build a Model Context Protocol (MCP) server using TypeScript. It provides a robust foundation that you can easily extend to create advanced MCP tools and seamlessly integrate them with various AI platforms.
 
-- **MCP Servers**: These servers act as bridges, exposing APIs, databases, and code libraries to external AI hosts. By implementing an MCP server in TypeScript, developers can share data sources or computational logic in a standardized way.
-- **MCP Clients**: These are the consumer-facing side of MCP, communicating with servers to query data or perform actions. MCP clients also use TypeScript SDKs, ensuring a uniform approach to tool usage.
+## Core Components
+
+- **MCP Servers**: These servers act as bridges, exposing APIs, databases, and code libraries to external AI hosts. By implementing an MCP server in TypeScript, developers can share data sources or computational logic in a standardized way using JSON-RPC 2.0.
+- **MCP Clients**: These are the consumer-facing side of MCP, communicating with servers to query data or perform actions. MCP clients use TypeScript SDKs, ensuring type-safe interactions and uniform approach to tool usage.
 - **MCP Hosts**: Systems such as Claude, Cursor, Windsurf, Cline, and other TypeScript-based platforms coordinate requests between servers and clients, ensuring seamless data flow. A single MCP server can thus be accessed by multiple AI hosts without custom integrations.
+
+## TypeScript Implementation
+
+The MCP TypeScript SDK provides core classes for building servers:
+
+```typescript
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+
+const server = new Server({
+  name: "mcp-server-starter",
+  version: "1.0.0",
+  capabilities: {
+    tools: {},      // Enable tools capability
+    resources: {},  // Enable resource access
+    prompts: {},    // Enable prompt handling
+    streaming: true // Enable streaming responses
+  }
+});
+
+// Connect transport
+const transport = new StdioServerTransport();
+await server.connect(transport);
+```
 
 By using MCP, developers no longer need complex custom code to integrate new tools or services. Instead, they build an MCP server and make it available to supported hosts.
 
@@ -550,3 +576,25 @@ By following this template and best practices, you can quickly build a robust MC
 - **Website**: [https://www.sethrose.dev](https://www.sethrose.dev)
 - **𝕏 (Twitter)**: [https://x.com/TheSethRose](https://x.com/TheSethRose)
 - **🦋 (Bluesky)**: [https://bsky.app/profile/sethrose.dev](https://bsky.app/profile/sethrose.dev)
+
+## Best Practices
+
+1. **Type Safety**:
+   - Leverage TypeScript's type system for robust tool definitions
+   - Use Zod schemas for runtime validation
+   - Define clear interfaces for tool parameters and responses
+
+2. **Transport Selection**:
+   - Use `StdioServerTransport` for local process communication
+   - Implement `WebSocketServerTransport` for network-based tools
+   - Consider custom transports for specific use cases
+
+3. **Capability Management**:
+   - Clearly define server capabilities during initialization
+   - Implement proper capability negotiation
+   - Handle capability-specific errors gracefully
+
+4. **Security Considerations**:
+   - Implement user consent flows for sensitive operations
+   - Validate all inputs using TypeScript types and Zod schemas
+   - Handle errors securely without exposing internal details
