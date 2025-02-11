@@ -2,8 +2,6 @@
 
 The Model Context Protocol (MCP) is a specialized framework designed to streamline the process of enabling AI agents to interact with a wide array of tools. This starter template helps you quickly build a Model Context Protocol (MCP) server using TypeScript. It provides a robust foundation that you can easily extend to create advanced MCP tools and seamlessly integrate them with AI assistants like Claude or other MCP-supported platforms. By following this guide, you can effectively design, build, and manage custom functionalities without the overhead of writing specialized integration code.
 
-It is divided into three core components:
-
 - **MCP Servers**: These servers act as bridges, exposing APIs, databases, and code libraries to external AI hosts. By implementing an MCP server in Python or TypeScript, developers can share data sources or computational logic in a standardized way.
 - **MCP Clients**: These are the consumer-facing side of MCP, communicating with servers to query data or perform actions. MCP clients also use Python or TypeScript SDKs, ensuring a uniform approach to tool usage.
 - **MCP Hosts**: Systems such as Claude Desktop, Zed, and Sourcegraph Cody coordinate requests between servers and clients, ensuring seamless data flow. A single MCP server can thus be accessed by multiple AI hosts without custom integrations.
