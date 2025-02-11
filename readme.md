@@ -1,4 +1,5 @@
 ## What is MCP?
+[![smithery badge](https://smithery.ai/badge/@TheSethRose/mcp-server-starter)](https://smithery.ai/server/@TheSethRose/mcp-server-starter)
 
 The Model Context Protocol (MCP) is a specialized framework designed to streamline the process of enabling AI agents to interact with a wide array of tools. This starter template helps you quickly build a Model Context Protocol (MCP) server using TypeScript. It provides a robust foundation that you can easily extend to create advanced MCP tools and seamlessly integrate them with AI assistants like Claude or other MCP-supported platforms.
 
