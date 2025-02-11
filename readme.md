@@ -1,4 +1,5 @@
 ## What is MCP?
+
 [![smithery badge](https://smithery.ai/badge/@TheSethRose/mcp-server-starter)](https://smithery.ai/server/@TheSethRose/mcp-server-starter)
 
 The Model Context Protocol (MCP) is a specialized framework designed to streamline the process of enabling AI agents to interact with a wide array of tools. This starter template helps you quickly build a Model Context Protocol (MCP) server using TypeScript. It provides a robust foundation that you can easily extend to create advanced MCP tools and seamlessly integrate them with AI assistants like Claude or other MCP-supported platforms.
@@ -35,6 +36,14 @@ mcp-server/
 The `.devcontainer` directory streamlines container-based development, while the `src/` folder houses the main server logic and examples of custom tools. This structure keeps your project organized and easy to navigate.
 
 ## Quick Start
+
+### Installing via Smithery
+
+To install MCP Server Starter for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@TheSethRose/mcp-server-starter):
+
+```bash
+npx -y @smithery/cli install @TheSethRose/mcp-server-starter --client claude
+```
 
 1. **Clone this template**: Retrieve the repository files from your preferred source.
 2. **Open in VS Code with Dev Containers**: If you have the Dev Containers extension installed, you will be prompted to open this project inside a container.
