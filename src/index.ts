@@ -18,14 +18,16 @@ import { registerCalculatorTool } from "./examples/calculator.js";
 import { registerRestApiTool } from "./examples/rest-api.js";
 
 /**
- * Create a new MCP server instance.
- * The server is configured with basic metadata and capabilities.
+ * Create a new MCP server instance with full capabilities
  */
 const server = new McpServer({
   name: "mcp-server-starter",
   version: "0.1.0",
   capabilities: {
-    tools: {}  // Enable tools capability
+    tools: {},
+    resources: {},
+    prompts: {},
+    streaming: true
   }
 });
 

@@ -1,5 +1,9 @@
 # Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
 
+name: "@TheSethRose/mcp-server-starter"
+description: "A TypeScript-based Model Context Protocol (MCP) server template"
+version: "0.1.0"
+
 startCommand:
   type: stdio
   configSchema:
@@ -43,3 +47,10 @@ startCommand:
         REST_API_MAX_RETRIES: config.restApi?.maxRetries?.toString() || '3'
       }
     })
+
+clients:
+  - claude
+  - cursor
+  - windsurf
+  - cline
+  - typescript

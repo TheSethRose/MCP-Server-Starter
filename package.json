@@ -26,14 +26,21 @@
     "debug": "node --inspect build/index.js",
     "debug:watch": "concurrently \"npm run watch\" \"npm run debug\"",
     "logs": "tail -n 20 -F ~/Library/Logs/Claude/mcp*.log",
-    "clean": "rm -rf build"
+    "clean": "rm -rf build",
+    "start": "node build/index.js",
+    "smithery:build": "docker build -t mcp-server-starter -f Dockerfile.smithery .",
+    "smithery:run": "docker run -i --rm mcp-server-starter"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.3"
+    "@modelcontextprotocol/sdk": "^1.0.3",
+    "@smithery/sdk": "latest"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
     "typescript": "^5.3.3",
     "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
