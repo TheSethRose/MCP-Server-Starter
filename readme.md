@@ -2,11 +2,11 @@
 
 [![smithery badge](https://smithery.ai/badge/@TheSethRose/mcp-server-starter)](https://smithery.ai/server/@TheSethRose/mcp-server-starter)
 
-The Model Context Protocol (MCP) is a specialized framework designed to streamline the process of enabling AI agents to interact with a wide array of tools. This starter template helps you quickly build a Model Context Protocol (MCP) server using TypeScript. It provides a robust foundation that you can easily extend to create advanced MCP tools and seamlessly integrate them with AI assistants like Claude or other MCP-supported platforms.
+The Model Context Protocol (MCP) is a specialized framework designed to streamline the process of enabling AI agents to interact with a wide array of tools. This starter template helps you quickly build a Model Context Protocol (MCP) server using TypeScript. It provides a robust foundation that you can easily extend to create advanced MCP tools and seamlessly integrate them with various AI platforms.
 
-- **MCP Servers**: These servers act as bridges, exposing APIs, databases, and code libraries to external AI hosts. By implementing an MCP server in Python or TypeScript, developers can share data sources or computational logic in a standardized way.
-- **MCP Clients**: These are the consumer-facing side of MCP, communicating with servers to query data or perform actions. MCP clients also use Python or TypeScript SDKs, ensuring a uniform approach to tool usage.
-- **MCP Hosts**: Systems such as Claude Desktop, Zed, and Sourcegraph Cody coordinate requests between servers and clients, ensuring seamless data flow. A single MCP server can thus be accessed by multiple AI hosts without custom integrations.
+- **MCP Servers**: These servers act as bridges, exposing APIs, databases, and code libraries to external AI hosts. By implementing an MCP server in TypeScript, developers can share data sources or computational logic in a standardized way.
+- **MCP Clients**: These are the consumer-facing side of MCP, communicating with servers to query data or perform actions. MCP clients also use TypeScript SDKs, ensuring a uniform approach to tool usage.
+- **MCP Hosts**: Systems such as Claude, Cursor, Windsurf, Cline, and other TypeScript-based platforms coordinate requests between servers and clients, ensuring seamless data flow. A single MCP server can thus be accessed by multiple AI hosts without custom integrations.
 
 By using MCP, developers no longer need complex custom code to integrate new tools or services. Instead, they build an MCP server and make it available to supported hosts.
 
@@ -39,10 +39,23 @@ The `.devcontainer` directory streamlines container-based development, while the
 
 ### Installing via Smithery
 
-To install MCP Server Starter for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@TheSethRose/mcp-server-starter):
+To install MCP Server Starter for any supported client:
 
 ```bash
+# For Claude
 npx -y @smithery/cli install @TheSethRose/mcp-server-starter --client claude
+
+# For Cursor
+npx -y @smithery/cli install @TheSethRose/mcp-server-starter --client cursor
+
+# For Windsurf
+npx -y @smithery/cli install @TheSethRose/mcp-server-starter --client windsurf
+
+# For Cline
+npx -y @smithery/cli install @TheSethRose/mcp-server-starter --client cline
+
+# For TypeScript
+npx -y @smithery/cli install @TheSethRose/mcp-server-starter --client typescript
 ```
 
 1. **Clone this template**: Retrieve the repository files from your preferred source.
@@ -364,6 +377,43 @@ const server = new McpServer({
 ```
 
 ## Integration with MCP Hosts
+
+### Multi-Client Support
+
+This MCP server template supports multiple AI platforms out of the box:
+
+1. **Claude Desktop**:
+   - Provides a chat-based environment
+   - Supports all MCP capabilities
+   - Ideal for conversational AI interactions
+
+2. **Cursor**:
+   - AI-powered development environment
+   - Full tool integration support
+   - Perfect for coding assistance
+
+3. **Windsurf**:
+   - Modern AI development platform
+   - Complete MCP protocol support
+   - Streamlined workflow integration
+
+4. **Cline**:
+   - Command-line AI interface
+   - Tool-focused interactions
+   - Efficient terminal-based usage
+
+5. **TypeScript**:
+   - Native TypeScript support
+   - Type-safe tool development
+   - Seamless SDK integration
+
+Each client can be configured using the appropriate Smithery CLI command:
+
+```bash
+npx -y @smithery/cli run @TheSethRose/mcp-server-starter --client [client-name]
+```
+
+Replace `[client-name]` with one of: `claude`, `cursor`, `windsurf`, `cline`, or `typescript`.
 
 ### Smithery Integration
 
